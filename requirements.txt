@@ -1,0 +1,5 @@
+# Kaggle normally includes these. No package installation is needed there.
+torch>=2.6
+numpy>=1.26
+Pillow>=10
+matplotlib>=3.8

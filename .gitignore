@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+data/
+Dataset/
+outputs/
+*.zip
+*.pt
+*.pth
+.DS_Store
+.monitor/
+STATE.md
