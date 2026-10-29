@@ -1,10 +1,10 @@
 # FAR-POLYP-SEG starter
 
-A small B.Tech project for drawing polyp masks on colonoscopy images. Paste [`kaggle_polyp.py`](kaggle_polyp.py) into a Kaggle Python notebook, set the dataset path, and run it. It displays samples, preprocesses images and masks, augments training images, trains a small U-Net, and saves predictions.
+Polyp segmentation on colonoscopy images. Open [`kaggle_polyp.ipynb`](kaggle_polyp.ipynb) in Kaggle for separate preprocessing, training and inference sections. It displays samples, preprocesses images and masks, augments training images, trains a small U-Net, and saves predictions.
 
 ## Dataset and links
 
-This project uses **FAR-POLYP-SEG**. The earlier research chat identifies this dataset explicitly.
+This project uses **FAR-POLYP-SEG**.
 
 - [Dataset and licence on Zenodo](https://doi.org/10.5281/zenodo.20284781)
 - [FAR-POLYP-SEG paper](https://doi.org/10.1007/s10278-026-02268-5)
@@ -30,10 +30,12 @@ Dataset/
 
 ## Run directly in Kaggle
 
-1. Attach the extracted FAR dataset to a Python notebook. Enable a GPU if available.
-2. Open `kaggle_polyp.py` from this repo and paste its entire contents into one code cell.
-3. Edit the `CONFIG` dictionary near the top. Set `data_root` to the attached folder containing `Patient1`, `Patient2`, etc. For example, `/kaggle/input/YOUR-DATASET-SLUG/Dataset`. This is a placeholder, not a verified mount path.
-4. Use a new `output_dir` for each run, such as `/kaggle/working/far_run_01`. Run the cell.
+1. Download `kaggle_polyp.ipynb` and import it into Kaggle as a notebook. Attach the extracted FAR dataset and enable a GPU if available.
+2. Run **Setup** once. It loads the pipeline functions without starting training.
+3. In **1. Preprocessing**, edit `DATA_ROOT` to the attached folder containing `Patient1`, `Patient2`, etc. For example, `/kaggle/input/YOUR-DATASET-SLUG/Dataset`. This is a placeholder, not a verified mount path. Set a new `OUTPUT_DIR`, such as `/kaggle/working/far_run_01`, then run the cell to display images, masks and augmented samples.
+4. Run **2. Training** to train and evaluate. Run **3. Inference** to load the checkpoint and predict an image. `INPUT_IMAGE` is optional; the default uses a held-out polyp frame.
+
+The notebook is self-contained. It needs no repository clone after importing. For a single-cell version, paste all of [`kaggle_polyp.py`](kaggle_polyp.py) into a code cell and edit its `CONFIG` dictionary instead.
 
 If you cannot find the root, run this separate cell first. It prints candidates so you can inspect and choose one:
 
@@ -48,6 +50,7 @@ These are the fields to edit. **No download link or API key goes in the training
 
 | Field or location | What goes there |
 | --- | --- |
+| Notebook `DATA_ROOT`, `OUTPUT_DIR`, `INPUT_IMAGE` | Local paths for the three stages. The first stage copies the dataset and result paths into `CONFIG` and saves a patient split for training. |
 | Kaggle notebook's attached input | Your uploaded FAR dataset. Its URL is for sharing the data input with your team. |
 | `CONFIG['data_root']` | Actual local folder containing `PatientN` directories. Required. |
 | `CONFIG['output_dir']` | New folder under `/kaggle/working` for results. |
@@ -116,6 +119,8 @@ To reuse a split, set `manifest_csv` to the saved `split.csv`. Its columns are `
 Run the focused checks with `python -m unittest discover -s tests -v`. They cover patient separation, missing masks, normal labels, augmentation alignment, metric edge cases, and a one-epoch checkpoint/inference run using synthetic images. A synthetic check proves that the pipeline runs; it says nothing about medical accuracy.
 
 Local verification passed all eight checks. The downloaded release matched the checksum above, and the loader read all 8,181 frames from 455 patients. A separate one-epoch CPU run used 205 real frames from 12 patients, 64 x 64 inputs, and four base channels; checkpoint reload and 672 x 480 inference worked. That quick run marked all 16 normal test images as foreground, so it is not a useful trained model. The default five-epoch Kaggle GPU run remains unverified.
+
+The notebook embeds the script definitions and runs the three stages separately. Its cells passed a separate CPU check with 15 synthetic frames from nine patients: previews ran before training, one epoch saved a checkpoint, and inference restored the original image size. This checks execution, not medical accuracy. To refresh the notebook after changing `kaggle_polyp.py`, run `python tools/build_kaggle_notebook.py`.
 
 This project is for research and coursework. A separate hospital dataset is still needed to test the cross-hospital research question. Keep test patients out of later threshold tuning, and report how many normal images were used for calibration. Do not use this model for clinical decisions.
 
